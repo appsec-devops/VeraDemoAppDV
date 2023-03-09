@@ -28,13 +28,14 @@ jobs:
     - name: Start SAST scan
       run: java -jar VeracodeJavaAPI.jar -action uploadandscan -vid "${{secrets.VERACODE_API_ID}}" -vkey "${{secrets.VERACODE_API_KEY}}" -appname Github-import-issues-scan -createprofile true -version "GitHub Actions job $GITHUB_RUN_NUMBER" -filepath ./app/target/verademo.war
 
-    - name: save standard results
-      uses: actions/upload-artifact@v1
-      with:
-          name: PipelineScanResults
-          path: results.json
-    - name: save filtered results
-      uses: actions/upload-artifact@v1
+    - name: save filtered results file
+      uses: actions/upload-artifact@v2
       with:
           name: filtered-results
           path: filtered_results.json
+
+    - name: Veracode scan results to GitHub issues Action
+      uses: veracode/veracode-flaws-to-issues@v2.1.0
+      with:
+        scan-results-json: filtered_results.json
+        github-token: ${{ github.token }}
